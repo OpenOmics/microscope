@@ -1,0 +1,145 @@
+# app.R
+
+packages_to_load = c(
+  "shiny",
+  "ggplot2",
+  "ggpubr",
+  "dplyr",
+  "tidyr",
+  "readr",
+  "stringr",
+  "plotly",
+  "bslib",
+  "tibble",
+  "ape",
+  "vegan",
+  "usedist",
+  "scales",
+  "shinyFiles"
+)
+
+# Load packages without printing output
+invisible(suppressPackageStartupMessages({
+  lapply(packages_to_load, library, character.only = TRUE)
+}))
+
+
+# Load helper functions
+source("utils.R")
+
+# Color palette for discrete groups
+col21 <- rev(c("tomato1","darkblue","turquoise1","lightblue","darkred","mediumblue","purple","bisque",
+               "greenyellow","yellow","violetred2","darkgreen","darkgoldenrod1","deeppink3","cadetblue4",
+               "orchid2","seagreen3","purple4","dodgerblue2","red","gray27"))
+
+
+ui <- fluidPage(
+  titlePanel("Microbiome Diversity Viewer"),
+  theme = bs_theme(version = 5),
+  
+  sidebarLayout(
+    sidebarPanel(
+      card(
+        card_header("Upload and Configure"),
+        fileInput("metadata", "Upload Metadata CSV", accept = ".csv"),
+        shinyDirButton("div_dir", "Select Diversity Folder", "Please select a folder"),
+        textOutput("div_dir_text"),
+        actionButton("load_btn", "Load Diversity Metrics"),
+        card_header("Alpha diversity"),
+        uiOutput("group_column_ui"),
+        br(),
+        br(),
+        card_header("Beta Diversity (PCoA)"),
+        uiOutput("beta_matrix_ui"),
+        uiOutput("beta_group_ui"),
+        actionButton("plot_beta_btn", "Plot PCoA")
+      )
+    ),
+    
+    mainPanel(
+      tabsetPanel(
+        tabPanel("Metadata Preview", card(card_header("Metadata Table"), tableOutput("metadata_preview"))),
+        tabPanel("Alpha Diversity", card(card_header("Alpha Diversity Plot"), plotlyOutput("alpha_plot", width = "100%", height = "600px"))),
+        tabPanel("Beta Diversity (PCoA)", card(card_header("PCoA Plot"), plotOutput("beta_plot", width = "100%", height = "600px")))
+      )
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  alpha_data <- reactiveVal(NULL)
+  beta_data <- reactiveVal(NULL)
+  
+  volumes <- c(Home = fs::path_home(), "Root" = "/")
+  shinyDirChoose(input, "div_dir", roots = volumes, session = session)
+  
+  observe({
+    dir_path <- parseDirPath(volumes, input$div_dir)
+    output$div_dir_text <- renderText({
+      if (length(dir_path) > 0) paste("Selected folder:", dir_path) else "No folder selected"
+    })
+  })
+  
+  observeEvent(input$load_btn, {
+    req(input$metadata)
+    dir_path <- parseDirPath(volumes, input$div_dir)
+    req(dir_path)
+    
+    try({
+      diversity <- load_diversity_metrics(input$metadata$datapath, dir_path)
+      alpha_data(diversity$alpha)
+      beta_data(diversity)
+    }, silent = FALSE)
+  })
+  
+  output$group_column_ui <- renderUI({
+    req(alpha_data())
+    selectInput("group_by", "Group by Column", 
+                choices = setdiff(colnames(alpha_data()), c("sampleID", "Metric", "Value")))
+  })
+  
+  output$alpha_plot <- renderPlotly({
+    req(alpha_data(), input$group_by)
+    plot_alpha_diversity(alpha_data(), input$group_by)
+  })
+  
+  output$beta_matrix_ui <- renderUI({
+    req(beta_data())
+    pretty_names <- names(beta_data()$beta) %>%
+      str_replace_all("-", " ") %>%
+      str_to_title()
+    selectInput("beta_matrix", "Select Distance Matrix",
+                choices = setNames(names(beta_data()$beta), pretty_names))
+  })
+  
+  output$beta_group_ui <- renderUI({
+    req(beta_data())
+    selectInput("beta_group", "Select Grouping Variable",
+                choices = setdiff(colnames(beta_data()$metadata), "sampleID"))
+  })
+  
+  output$beta_plot <- renderPlot({
+    req(input$plot_beta_btn, beta_data(), input$beta_matrix)
+    
+    isolate({
+      dm <- beta_data()$beta[[input$beta_matrix]]
+      metadata <- beta_data()$metadata
+      
+      plot_beta_pcoa(
+        dm = dm,
+        metatable = metadata,
+        grp = input$beta_group,
+        dm_name = input$beta_matrix,
+        permtest = TRUE,
+        grp_continuous = FALSE
+      )
+    })
+  })
+  
+  output$metadata_preview <- renderTable({
+    req(beta_data())
+    head(beta_data()$metadata, 10)
+  })
+}
+
+shinyApp(ui, server)
