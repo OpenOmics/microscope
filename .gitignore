@@ -1,1 +1,52 @@
 test_data/
+
+# History files
+.Rhistory
+.Rapp.history
+
+# Session Data files
+.RData
+.Ruserdata
+
+# RStudio files
+.Rproj.user/
+*.Rproj
+
+# R package build artifacts
+.Rbuildignore
+.Rcheck/
+.Rinst/
+.Rlibs/
+.Rout
+.Rout.save
+.Rout.fail
+
+# Compiled shared objects, dynamic libraries, etc.
+*.o
+*.so
+*.dll
+*.exe
+
+# Coverage reports
+coverage.html
+*.gcov
+*.lcov
+
+# Shiny app logs and temp files
+rsconnect/
+shinyapps/
+*.log
+
+# Data files
+*.csv
+*.tsv
+*.rds
+*.rda
+
+# Other
+.DS_Store
+*.tar.gz
+*.zip
+*.egg-info/
+.vscode/
+.idea/
