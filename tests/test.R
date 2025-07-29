@@ -1,3 +1,4 @@
+#!/usr/bin/env Rscript
 # manual test
 library(shiny)
 library(ggplot2)
@@ -25,8 +26,8 @@ col21 <- rev(c("tomato1","darkblue","turquoise1","lightblue","darkred","mediumbl
 
 
 
-md = read.csv('test_data/nhlbi-167_diversity_shiny_test/metadata_nhlbi167.csv')
-dm = read.table('test_data/nhlbi-167_diversity_shiny_test/weighted-unifrac.tsv',check.names = FALSE, sep = "\t")
+md = read.csv('../test_data/nhlbi-167_diversity_shiny_test/metadata_nhlbi167.csv')
+dm = read.table('../test_data/nhlbi-167_diversity_shiny_test/weighted-unifrac.tsv',check.names = FALSE, sep = "\t")
 
-df <- read.table('test_data/nhlbi-167_diversity_shiny_test/weighted-unifrac.tsv', header = TRUE, sep = "\t", check.names = FALSE)
+df <- read.table('../test_data/nhlbi-167_diversity_shiny_test/weighted-unifrac.tsv', header = TRUE, sep = "\t", check.names = FALSE)
 plot_beta_pcoa(dm,md,'Stage','x')
