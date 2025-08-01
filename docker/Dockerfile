@@ -42,6 +42,9 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
 # This section installs system packages 
 # required for your project. If you need 
 # extra system packages add them here.
+# Get system library dependencies of
+# R packages by running within R:
+# pak::pkg_sysreqs(c("devtools","packageX","packageY","packageZ"), sysreqs_platform = "ubuntu-24.04")
 RUN apt-get update \
     && apt-get -y upgrade \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -53,31 +56,24 @@ RUN apt-get update \
         gawk \
         git \
         gzip \
+        libcurl4-openssl-dev \
+        libfontconfig1-dev \
+        libfreetype6-dev \
+        libfribidi-dev \
         libgit2-dev \
-        libpng-dev \
-        libtiff5-dev \
+        libharfbuzz-dev \
+        libicu-dev \
         libjpeg-dev \
+        libpng-dev \
+        libssl-dev \
+        libtiff-dev \
+        libx11-dev \
         libxml2-dev \
         locales \
         make \
+        pandoc \
         python3 \
         python3-pip \
-        r-base \
-        r-cran-ape \
-        r-cran-bslib \
-        r-cran-devtools \
-        r-cran-dplyr \
-        r-cran-ggplot2 \
-        r-cran-ggpubr \
-        r-cran-plotly \
-        r-cran-readr \
-        r-cran-scales \
-        r-cran-shiny \
-        r-cran-shinyfiles \
-        r-cran-stringr \
-        r-cran-tibble \
-        r-cran-tidyr \
-        r-cran-vegan \
         unzip \
         wget \
         zlib1g-dev \
@@ -109,11 +105,77 @@ RUN mkdir -p /opt2/ \
         && make \
         && make install
 
-# Install missing R packages from Github,
-# These are R packages that cannot be installed
-# via apt-get.
-# Install usedist from github.
-RUN /usr/bin/Rscript -e 'devtools::install_github("kylebittinger/usedist")'
+# Install CRAN packages
+RUN Rscript - <<EOF
+# Misc helper functions 
+err <- function(...){cat(sprintf(...), sep='\n', file=stderr())}
+fatal <- function(...) {err(...); quit(status = 1)}
+
+# Number of CPUs processes 
+# to use for parallelizing
+# the install of N packages 
+use_ncpus <- max(parallel::detectCores()-2, 2)
+
+# CRAN packages,
+# add any missing/required
+# CRAN packages to the list
+# directly below. This script
+# will install them if they
+# are not already installed.
+# Install via: 
+#   install.packages('packageName', repos='http://cran.r-project.org')
+cran_packages <- c(
+    "ape",
+    "bslib",
+    "devtools",
+    "dplyr",
+    "ggplot2",
+    "ggpubr",
+    "plotly",
+    "readr",
+    "scales",
+    "shiny",
+    "shinyFiles",
+    "stringr",
+    "tibble",
+    "tidyr",
+    "usedist",
+    "vegan"
+)
+
+# Get list of missing CRAN packages
+missing <- setdiff(
+    cran_packages, rownames(installed.packages())
+)
+# Log what will be installed
+print(
+    paste0("Installing ", length(missing), " missing packages: ", paste(missing, collapse = ", "))
+)
+# Install missing CRAN packages 
+install.packages(
+    missing,
+    Ncpus = use_ncpus,
+    repos = 'http://cran.r-project.org'
+)
+
+# Check for any missing packages
+# after installation, some times
+# install.packages() continues on
+# error and does not stop with a
+# non-zero exit code.
+# Get list of missing CRAN packages
+missing <- setdiff(
+    cran_packages, rownames(installed.packages())
+)
+# If there are still missing packages
+# exit with a non-zero exit code
+if (length(missing) > 0) {
+    err("Error: The following CRAN packages are still missing after installation: %s", paste(missing, collapse = ", "))
+    fatal("Please check the installation logs for errors and try again!")
+} else {
+    print("All required CRAN packages are installed.")
+}
+EOF
 
 # Install microscope from local
 # github repository, must copy
@@ -150,4 +212,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
         CMD curl -f http://localhost:8080 \
         || (echo 'Error: Health check failed, unable to reach Shiny app on port 8080!' >&2 && exit 1)
 # Run the microscope shiny application
-CMD ["/usr/bin/R", "-e", "shiny::runApp('/srv/shiny-server/microscope', port=8080, host='0.0.0.0')"]
+CMD ["R", "-e", "shiny::runApp('/srv/shiny-server/microscope', port=8080, host='0.0.0.0')"]
