@@ -8,21 +8,22 @@ FROM rocker/shiny:4.4.3
 # • https://github.com/OpenOmics/microscope
 # @TLDR:
 # • R already satisfied: 4.4.3
-#     • shiny,   installed via apt-get
-#     • ggplot2, installed via apt-get
-#     • ggpubr,  installed via apt-get
-#     • dplyr,   installed via apt-get
-#     • tidyr,   installed via apt-get
-#     • readr,   installed via apt-get
-#     • stringr, installed via apt-get
-#     • plotly,  installed via apt-get
-#     • bslib,   installed via apt-get
-#     • tibble,  installed via apt-get
-#     • ape,     installed via apt-get  
-#     • vegan,   installed via apt-get
-#     • usedist, installed via github
-#     • scales,  installed via apt-get
-#     • shinyFiles, installed via apt-get
+#     • shiny,   installed via CRAN
+#     • ggplot2, installed via CRAN
+#     • ggpubr,  installed via CRAN
+#     • dplyr,   installed via CRAN
+#     • tidyr,   installed via CRAN
+#     • readr,   installed via CRAN
+#     • stringr, installed via CRAN
+#     • plotly,  installed via CRAN
+#     • bslib,   installed via CRAN
+#     • tibble,  installed via CRAN
+#     • ape,     installed via CRAN
+#     • vegan,   installed via CRAN
+#     • usedist, installed via CRAN
+#     • scales,  installed via CRAN
+#     • shinyFiles, installed via CRAN
+#     • devtools, installed via CRAN
 LABEL maintainer=kuhnsa@nih.gov
 
 ############### INIT ################
