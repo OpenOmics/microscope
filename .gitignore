@@ -50,3 +50,7 @@ shinyapps/
 *.egg-info/
 .vscode/
 .idea/
+
+# Docker build
+docker/shiny/
+docker/R/ 

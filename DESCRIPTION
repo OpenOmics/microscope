@@ -1,0 +1,30 @@
+Package: microscope
+Type: Package
+Title: An all-in-one microbiome diversity and taxonomy viewer
+Version: 0.1.0
+Author: Yue (Gary) Zhang <yue.zhang AT nih.gov>
+Maintainer: Skyler Kuhn <skyler.kuhn AT nih.gov>
+Description: A Shiny application for interactive data exploration and visualization of microbiome diversity and taxonomy data.
+Depends: R (>= 4.0)
+Imports:
+    shiny,
+    ggplot2,
+    ggpubr,
+    dplyr,
+    tidyr,
+    readr,
+    stringr,
+    plotly,
+    bslib,
+    tibble,
+    ape,
+    vegan,
+    usedist,
+    scales,
+    shinyFiles
+License: MIT
+Encoding: UTF-8
+URL: https://github.com/OpenOmics/microscope
+BugReports: https://github.com/OpenOmics/microscope/issues
+Language: en-US
+LazyData: true

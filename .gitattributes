@@ -1,0 +1,4 @@
+*.Rmd linguist-language=R
+*.Qmd linguist-language=R
+*.rmd linguist-language=R
+*.qmd linguist-language=R
