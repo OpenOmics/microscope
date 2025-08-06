@@ -1,4 +1,6 @@
-
+#' @import shinydashboard
+#' @import shiny
+#' 
 # Color palette for discrete groups
 col21 <- rev(c("tomato1","darkblue","turquoise1","lightblue","darkred","mediumblue","purple","bisque",
                "greenyellow","yellow","violetred2","darkgreen","darkgoldenrod1","deeppink3","cadetblue4",
@@ -61,7 +63,6 @@ col21 <- rev(c("tomato1","darkblue","turquoise1","lightblue","darkred","mediumbl
 #' @importFrom stringr str_ends str_remove
 #' @importFrom tidyr pivot_longer
 #' @importFrom tibble rownames_to_column
-#' @importFrom dplyr merge
 #' @export
 load_diversity_metrics <- function(metadata_csv, diversity_path) {
 

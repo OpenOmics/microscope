@@ -24,7 +24,6 @@ library(ape)
 library(vegan)
 library(usedist)
 library(scales)
-library(shinyFiles)
 
 ## Load helper functions from utils.R.  These functions define:
 ## * load_diversity_metrics() - loads alpha/beta diversity from files
@@ -32,7 +31,7 @@ library(shinyFiles)
 ## * plot_alpha_diversity()   - returns a ggplot for alpha diversity
 ## * plot_beta_pcoa()         - returns a ggplot for beta diversity PCoA
 ## * plot_tax_stacked_bar()   - returns a ggplot for stacked bar plots
-source("utils.R")
+source("../R/utils.R")
 
 ## Define a colour palette for discrete groups.  The palette is reversed
 ## relative to the original specification so that more common taxa appear
