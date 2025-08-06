@@ -10,6 +10,6 @@ This Shiny app provides an interactive interface to visualize **diversity metric
 - Generate **violin plots**, **boxplots**, and **scatter plots** for alpha diversity metrics.
 - Generate **PCoA plots** for beta diversity metrics.
 - Optional statistical comparisons between groups.
-- Taxonomy stacked bar plots coming soon!
+- Taxonomy stacked bar plots
 
 ---
