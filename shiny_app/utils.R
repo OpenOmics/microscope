@@ -181,7 +181,7 @@ plot_alpha_diversity <- function(df, group_by) {
             legend.position = "none")
   }
   
-  return(plotly::ggplotly(p))
+  return(p)
 }
 
 #' Plot PCoA with UniFrac or other distance metrics
@@ -308,4 +308,193 @@ plot_beta_pcoa <- function(dm, metatable, grp, dm_name, permtest = FALSE, grp_co
   }
   
   return(pcoa_plot)
+}
+
+#' Collapse Taxonomy Table to a Specific Level
+#'
+#' Extract and aggregate a taxonomy abundance table at a specified taxonomic level
+#' (e.g., kingdom, phylum, class, etc.). Automatically detects sample columns and
+#' optionally collapses to the top N most abundant taxa plus an "Others" category.
+#'
+#' @param intable A data frame containing at least a `clade_name` column and sample abundance columns.
+#'                The `clade_name` column should contain taxonomy strings separated by `|`.
+#' @param tax A character string specifying the taxonomic level to collapse to.
+#'            One of: `"kingdom"`, `"phylum"`, `"class"`, `"order"`, `"family"`, `"genus"`, `"species"`.
+#' @param top_n Integer. Number of top taxa to keep before collapsing others into "Others". Default = 9.
+#'
+#' @return A list with three elements:
+#' \describe{
+#'   \item{`outtable`}{Wide-format table collapsed at the specified taxonomic level, ordered by abundance.}
+#'   \item{`outtable_topN`}{Wide-format table collapsed to top N taxa plus "Others" if applicable.}
+#'   \item{`outtable_long`}{Long-format version of `outtable_topN`.}
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' # Collapse at genus level, keep top 15 taxa + Others
+#' tax_collapse(intable = my_tax_table, tax = "genus", top_n = 15)
+#' }
+#'
+#' @import dplyr tidyr stringr
+#' @export
+tax_collapse <- function(intable, tax, top_n = 9) {
+  # test
+  # intable = df
+  # tax = 'species'
+  # top_n = 9
+  
+  # Validate tax argument
+  valid_levels <- c("kingdom", "phylum", "class", "order", "family", "genus", "species")
+  if (!tax %in% valid_levels) {
+    stop("Invalid 'tax' argument. Choose from: ", paste(valid_levels, collapse = ", "))
+  }
+  
+  # Split taxonomy string into columns
+  intable[c("kingdom", "phylum", "class", "order", "family", "genus", "species", "t_index")] <-
+    stringr::str_split_fixed(intable$clade_name, "\\|", 8)
+  intable[intable == ""] <- NA
+  
+  # Detect sample columns automatically
+  tax_cols <- c("clade_name","kingdom","phylum","class","order","family","genus","species","t_index")
+  sample_cols <- setdiff(colnames(intable), tax_cols)
+  
+  # Subset based on taxonomic level
+  outtable <- switch(
+    tax,
+    "kingdom" = dplyr::filter(intable, !is.na(kingdom) & is.na(phylum)),
+    "phylum"  = dplyr::filter(intable, !is.na(phylum) & is.na(class)),
+    "class"   = dplyr::filter(intable, !is.na(class) & is.na(order)),
+    "order"   = dplyr::filter(intable, !is.na(order) & is.na(family)),
+    "family"  = dplyr::filter(intable, !is.na(family) & is.na(genus)),
+    "genus"   = dplyr::filter(intable, !is.na(genus) & is.na(species)),
+    "species" = dplyr::filter(intable, !is.na(species) & is.na(t_index))
+  )
+  
+  # Select taxonomy level and sample columns
+  outtable <- dplyr::select(outtable, all_of(c(tax, sample_cols)))
+  
+  # Order rows by total abundance
+  outtable <- outtable[order(rowSums(outtable[,-1], na.rm = TRUE), decreasing = TRUE), ]
+  
+  # Check if columns sum to 100
+  if (!all(round(colSums(outtable[,-1], na.rm = TRUE)) == 100)) {
+    warning("Column sums do not equal 100; returning only the main table.")
+    return(list(outtable = outtable, outtable_topN = NULL, outtable_long = NULL))
+  }
+  
+  # Collapse to top N + Others
+  if (nrow(outtable) > (top_n + 1)) {
+    top_taxa <- outtable[1:top_n, ]
+    others <- colSums(outtable[(top_n + 1):nrow(outtable), -1, drop = FALSE], na.rm = TRUE)
+    others_row <- c("Others", as.list(others))        
+    names(others_row)[1] <- tax                       
+    outtable_topN <- dplyr::bind_rows(top_taxa, as.list(others_row))
+  } else {
+    outtable_topN <- outtable
+  }
+  
+  # Reshape to long format
+  if (all(round(colSums(outtable_topN[,-1], na.rm = TRUE)) == 100)) {
+    outtable_long <- tidyr::pivot_longer(outtable_topN,
+                                         cols = -dplyr::all_of(tax),
+                                         names_to = "sampleID",
+                                         values_to = "frequency")
+  } else {
+    outtable_long <- NULL
+  }
+  
+  # Return results
+  list(outtable = outtable, outtable_topN = outtable_topN, outtable_long = outtable_long)
+}
+
+#' Plot Stacked Bar of Taxa Abundance
+#'
+#' Creates a stacked bar plot of relative abundance from taxonomic data, optionally split by
+#' up to two grouping variables from phenotype data.
+#'
+#' @param exps A data frame in long format (e.g., `outtable_long` from `tax_collapse()`), containing:
+#'   \itemize{
+#'     \item The first column = taxonomic level (e.g., "genus", "species")
+#'     \item A column `sampleID`
+#'     \item A column `frequency` for relative abundance
+#'   }
+#' @param pheno A phenotype data frame containing sample metadata. Must include `sampleID` column.
+#' @param split_by_1 Optional. A column name (string) in `pheno` for faceting by wrap. Default = `NULL`.
+#' @param split_by_2 Optional. A column name (string) in `pheno` for faceting by grid. Default = `NULL`.
+#' @param show_names Logical. Whether to display sample IDs on x-axis (rotated 60°). Default = `FALSE`.
+#'
+#' @return A `ggplot` object representing the stacked bar chart.
+#' @examples
+#' \dontrun{
+#' plot_tax_stacked_bar(exps = result$outtable_long, pheno = metadata)
+#' plot_tax_stacked_bar(exps, pheno, split_by_1 = "Treatment", show_names = TRUE)
+#' plot_tax_stacked_bar(exps, pheno, split_by_1 = "Treatment", split_by_2 = "Antibiotics")
+#' }
+#' @import ggplot2 dplyr
+#' @export
+plot_tax_stacked_bar <- function(exps, pheno, split_by_1 = NULL, split_by_2 = NULL, show_names = FALSE) {
+  # Simplify sampleID by removing suffix
+  pheno$sampleID <- sub("_metaphlan_bugs_list", "", pheno$sampleID)
+  exps$sampleID <- sub("_metaphlan_bugs_list", "", exps$sampleID)
+  
+  # Merge exps with phenotype data by sampleID
+  exps_merged <- dplyr::left_join(exps, pheno, by = "sampleID")
+  
+  # Validate split_by columns exist in pheno
+  if (!is.null(split_by_1) && !(split_by_1 %in% colnames(pheno))) {
+    stop(paste("split_by_1:", split_by_1, "is not a column in pheno."))
+  }
+  if (!is.null(split_by_2) && !(split_by_2 %in% colnames(pheno))) {
+    stop(paste("split_by_2:", split_by_2, "is not a column in pheno."))
+  }
+  
+  # Taxonomic column is the first column in exps
+  tax_col <- names(exps)[1]
+  
+  # Adaptive legend column calculation
+  n_taxa <- length(unique(exps_merged[[tax_col]]))
+  legend_cols <- max(2, min(5, ceiling(n_taxa / 8)))
+
+  
+  # Base plot
+  p <- ggplot(data = exps_merged,
+              mapping = aes_string(x = "sampleID", y = "frequency", fill = tax_col)) +
+    geom_bar(stat = "identity", color = "black", width = 1) +
+    scale_fill_manual(values = col21) +
+    theme_classic() +
+    theme(
+      legend.title = element_blank(),
+      legend.position = "bottom",
+      legend.text = element_text(size = 12),
+      legend.key.size = unit(0.3, "cm"),
+      axis.text.y = element_text(size = 15, face = "bold", color = "black"),
+      axis.title = element_text(size = 18, face = "bold"),
+      strip.text.x = element_text(size = 15, color = "black", face = "bold"),
+      strip.background = element_rect(color = "black", fill = "grey95", size = 1.5, linetype = "solid")
+    ) +
+    xlab("Sample") +
+    ylab("Relative Abundance") +
+    guides(fill = guide_legend(ncol = legend_cols))
+  
+  # Control x-axis labels based on show_names argument
+  if (show_names) {
+    p <- p + theme(
+      axis.text.x = element_text(size = 10, angle = 60, hjust = 1, vjust = 1),
+      plot.margin = margin(10, 10, 40, 10) # add extra bottom margin to avoid cutoff
+    )
+  } else {
+    p <- p + theme(
+      axis.text.x = element_blank(),
+      axis.ticks.x = element_blank()
+    )
+  }
+  
+  # Faceting logic
+  if (!is.null(split_by_1) && is.null(split_by_2)) {
+    p <- p + facet_wrap(as.formula(paste("~", split_by_1)), scales = "free_x")
+  } else if (!is.null(split_by_1) && !is.null(split_by_2)) {
+    p <- p + facet_grid(as.formula(paste(split_by_1, "~", split_by_2)), scales = "free_x")
+  }
+  
+  return(p)
 }
