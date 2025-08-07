@@ -7,7 +7,6 @@ Directly below are instructions for building an image using the provided Dockerf
 docker image ls
 
 # Build from Dockerfile
-cp -R ../shiny shiny  # Important: Need to run this every time to get changes! 
 docker buildx build --platform linux/amd64 --no-cache -f Dockerfile --tag=microscope:v0.1.0 .
 
 # Testing, take a peek inside
