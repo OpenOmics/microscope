@@ -47,6 +47,7 @@ col21 <- rev(c(
 
 # User interface ------------------
 ui <- dashboardPage(
+  title = "Microscope",
   dashboardHeader(
     title = tags$div("Microscope",
                      style = "font-size:32px; font-style:italic; font-weight:bold; text-align:left;")
