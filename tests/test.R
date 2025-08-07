@@ -24,9 +24,6 @@ col21 <- rev(c("tomato1","darkblue","turquoise1","lightblue","darkred","mediumbl
                "greenyellow","yellow","violetred2","darkgreen","darkgoldenrod1","deeppink3","cadetblue4",
                "orchid2","seagreen3","purple4","dodgerblue2","red","gray27"))
 
-
-
-<<<<<<< HEAD:manual_test.R
 md = read.csv('test_data/test1/metadata.csv')
 #dm = read.table('test_data/nhlbi-167_diversity_shiny_test/weighted-unifrac.tsv',check.names = FALSE, sep = "\t")
 
@@ -34,15 +31,18 @@ md = read.csv('test_data/test1/metadata.csv')
 #plot_beta_pcoa(dm,md,'Stage','x')
 
 
-df<- read.csv('test_data/test1/NCPHControl_merged.NIDDK26.metaphlan_bugs_list.amended.tsv', header = TRUE, check.names = FALSE)
+df<- read.csv('test_data/test1/NCPHControl_merged.NIDDK26.metaphlan_bugs_list.amended.csv', header = TRUE, check.names = FALSE)
+md = read.csv('test_data/test1/metadata.csv')
 df.species = tax_collapse(df,'genus',top_n = 9)[[3]]
-
+p = plot_tax_stacked_bar(exps = df.species,pheno = md,split_by_1 = 'type')
+ggplotly(p)
 
 plot_tax_stacked_bar(exps = df.species,pheno = md,split_by_2 = 'group',split_by_1 = 'type', show_names = F)
-=======
+
 md = read.csv('../test_data/nhlbi-167_diversity_shiny_test/metadata_nhlbi167.csv')
 dm = read.table('../test_data/nhlbi-167_diversity_shiny_test/weighted-unifrac.tsv',check.names = FALSE, sep = "\t")
 
 df <- read.table('../test_data/nhlbi-167_diversity_shiny_test/weighted-unifrac.tsv', header = TRUE, sep = "\t", check.names = FALSE)
 plot_beta_pcoa(dm,md,'Stage','x')
->>>>>>> origin/main:tests/test.R
+
+

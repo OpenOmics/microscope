@@ -474,7 +474,7 @@ plot_tax_stacked_bar <- function(exps, pheno, split_by_1 = NULL, split_by_2 = NU
       strip.background = element_rect(color = "black", fill = "grey95", size = 1.5, linetype = "solid")
     ) +
     xlab("Sample") +
-    ylab("Relative Abundance") +
+    ylab("Relative Abundance (%)") +
     guides(fill = guide_legend(ncol = legend_cols))
   
   # Control x-axis labels based on show_names argument

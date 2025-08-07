@@ -173,7 +173,7 @@ ui <- dashboardPage(
         ),
         fluidRow(
           column(12,
-            card(card_header("Stacked Bar Plot"), plotOutput("tax_bar_plot", height = "800px"))
+            card(card_header("Stacked Bar Plot"), plotlyOutput("tax_bar_plot", height = "800px"))
           )
         ),
         fluidRow(
@@ -195,10 +195,6 @@ server <- function(input, output, session) {
   pheno_data <- reactiveVal(NULL)
   count_matrix_data <- reactiveVal(NULL)
   tax_data   <- reactiveVal(NULL)
-
-  ## Configure file system roots for shinyFiles ----------
-  volumes <- c(Home = fs::path_home(), Root = "/")
-  shinyDirChoose(input, "div_dir", roots = volumes, session = session)
 
   ## Handle metadata upload ----------
   observeEvent(input$metadata, {
@@ -289,14 +285,15 @@ server <- function(input, output, session) {
   })
 
   ## Render taxonomy bar plot ----------
-  output$tax_bar_plot <- renderPlot({
+  output$tax_bar_plot <- renderPlotly({
     req(count_matrix_data(), pheno_data(), input$tax_level)
     tax_result <- tax_collapse(count_matrix_data(), tax = input$tax_level, top_n = input$top_n)
     split_1 <- if (input$split_by_1 == "None") NULL else input$split_by_1
     split_2 <- if (input$split_by_2 == "None") NULL else input$split_by_2
-    plot_tax_stacked_bar(exps = tax_result[[3]], pheno = pheno_data(),
-                         split_by_1 = split_1, split_by_2 = split_2,
-                         show_names = input$show_names)
+    p = plot_tax_stacked_bar(exps = tax_result[[3]], pheno = pheno_data(),
+                             split_by_1 = split_1, split_by_2 = split_2,
+                             show_names = input$show_names)
+    plotly::ggplotly(p)
   })
   
   ## Show download buttons only if files are available ---------------
