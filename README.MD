@@ -4,8 +4,8 @@
   
   **_Microbiome Diversity and Taxonomy Explorer_**
 
-  [![GitHub issues](https://img.shields.io/github/issues/OpenOmics/microscope?color=brightgreen)](https://github.com/OpenOmics/microscope/issues) [![GitHub license](https://img.shields.io/github/license/OpenOmics/microscope)](https://github.com/OpenOmics/microscope/blob/main/LICENSE) 
-  
+  [![GitHub issues](https://img.shields.io/github/issues/OpenOmics/microscope?color=brightgreen)](https://github.com/OpenOmics/microscope/issues) [![GitHub license](https://img.shields.io/github/license/OpenOmics/microscope)](https://github.com/OpenOmics/microscope/blob/main/LICENSE) [![Docker Pulls](https://img.shields.io/docker/pulls/skchronicles/microscope)](https://hub.docker.com/r/skchronicles/microscope/tags)
+
   <i>
     This is the home of the shiny application, microscope. Its long-term goals are to empowers researchers to rapidly explore, compare, and visialize microbiome diversity and taxonomy.
   </i>
