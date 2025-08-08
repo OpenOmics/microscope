@@ -9,21 +9,21 @@
 ## Download buttons and input controls are grouped and spaced using
 ## `div(style=...)` wrappers to ensure consistent margins.
 
-library(shiny)
-library(shinydashboard)
-library(ggplot2)
-library(ggpubr)
-library(dplyr)
-library(tidyr)
-library(readr)
-library(stringr)
-library(plotly)
-library(bslib)
-library(tibble)
-library(ape)
-library(vegan)
-library(usedist)
-library(scales)
+suppressMessages(library(shiny))
+suppressMessages(library(bs4Dash))
+suppressMessages(library(ggplot2))
+suppressMessages(library(ggpubr))
+suppressMessages(library(dplyr))
+suppressMessages(library(tidyr))
+suppressMessages(library(readr))
+suppressMessages(library(stringr))
+suppressMessages(library(plotly))
+suppressMessages(library(bslib))
+suppressMessages(library(tibble))
+suppressMessages(library(ape))
+suppressMessages(library(vegan))
+suppressMessages(library(usedist))
+suppressMessages(library(scales))
 
 ## Load helper functions from utils.R.  These functions define:
 ## * load_diversity_metrics() - loads alpha/beta diversity from files
@@ -48,14 +48,23 @@ col21 <- rev(c(
 # User interface ------------------
 ui <- dashboardPage(
   title = "Microscope",
-  dashboardHeader(
-    title = tags$div("Microscope",
-                     style = "font-size:32px; font-style:italic; font-weight:bold; text-align:left;")
+  help = NULL,
+  header = dashboardHeader(
+    title = dashboardBrand(
+      title = "Microscope",
+      image = "logo.openomics.png"
+    )
   ),
-  dashboardSidebar(width = 250,
+  dashboardSidebar(
+    width = 250,
     tags$div(
-         style = "text-align: center; padding: 50px 0px 50px 0px;",
-         tags$img(src = "logo.microscope.nobackground.png", height = "220px")
+      class = "sidebar-top-logo",
+      style = "text-align: center; padding: 50px 0px 50px 0px;",
+      tags$img(
+        src = "logo.microscope.nobackground.png",
+        height = "220px",
+        class = "sidebar-main-logo"
+      )
     ),
     sidebarMenu(
       menuItem("Home", tabName = "home_tab", icon = icon("home")),
@@ -65,12 +74,37 @@ ui <- dashboardPage(
       menuItem("Taxonomy", tabName = "taxo", icon = icon("layer-group"))
     ),
     div(
-      style = "position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: center; gap: 25px;",
-      tags$img(src = "logo.rtb.png", height = "60px", style = "margin-bottom:10px;"),
-      tags$img(src = "logo.openomics.png", height = "60px")
+      style = "position: absolute; bottom: 20px; width: 100%; display: flex; flex-direction: column; align-items: center;",
+      tags$a(
+        href = "https://github.com/OpenOmics/microscope",
+        target = "_blank",
+        icon("github"),
+        style = "font-size: 42px; color: #000; text-decoration: none; margin-bottom: 12px;"
+      ),
+      div(
+        style = "display: flex; justify-content: center; gap: 25px;",
+        tags$a(
+          href = "https://github.com/OpenOmics",
+          target = "_blank",
+          rel = "noopener noreferrer",
+          tags$img(
+            src = "logo.rtb.png",
+            height = "50px",
+            style = "margin-bottom:10px; cursor:pointer;"
+          )
+        )
+      )
     )
   ),
   dashboardBody(
+    tags$head(
+      tags$style(HTML("
+        /* Fully hide the microscope logo when the sidebar is collapsed */
+        body.sidebar-mini.sidebar-collapse .sidebar-top-logo {
+          display: none !important;
+        }
+      "))
+    ),
     tabItems(
       ## Home tab --------------------------------------------------
       tabItem(tabName = "home_tab",
