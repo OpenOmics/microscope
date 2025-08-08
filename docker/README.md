@@ -7,23 +7,23 @@ Directly below are instructions for building an image using the provided Dockerf
 docker image ls
 
 # Build from Dockerfile
-docker buildx build --platform linux/amd64 --no-cache -f Dockerfile --tag=microscope:v0.1.0 .
+docker buildx build --platform linux/amd64 --no-cache -f Dockerfile --tag=microscope:v0.2.0 .
 
 # Testing, take a peek inside
-docker run --platform linux/amd64 -ti microscope:v0.1.0 /bin/bash
+docker run --platform linux/amd64 -ti microscope:v0.2.0 /bin/bash
 # Start up the application,
 # runs on localhost:8080
-docker run --platform linux/amd64 -p 8080:8080 microscope:v0.1.0
+docker run --platform linux/amd64 -p 8080:8080 microscope:v0.2.0
 
 # Updating Tag  before pushing to DockerHub
-docker tag microscope:v0.1.0 skchronicles/microscope:v0.1.0
-docker tag microscope:v0.1.0 skchronicles/microscope        # latest
+docker tag microscope:v0.2.0 skchronicles/microscope:v0.2.0
+docker tag microscope:v0.2.0 skchronicles/microscope        # latest
 
 # Check out new tag(s)
 docker image ls
 
 # Push new tagged image to DockerHub
-docker push skchronicles/microscope:v0.1.0
+docker push skchronicles/microscope:v0.2.0
 docker push skchronicles/microscope:latest
 ```
 
@@ -32,7 +32,7 @@ docker push skchronicles/microscope:latest
 Scan your image for known vulnerabilities:
 
 ```bash
-docker scan microscope:v0.1.0
+docker scan microscope:v0.2.0
 ```
 
 > **Please Note**: Any references to `skchronicles` should be replaced your username if you would also like to push the image to a non-org account.
