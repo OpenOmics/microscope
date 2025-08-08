@@ -23,7 +23,7 @@ FROM rocker/shiny:4.4.3
 #     • usedist, installed via CRAN
 #     • scales,  installed via CRAN
 #     • pak,     installed via CRAN
-#     • shinydashboard, installed via CRAN
+#     • bs4Dash, installed via CRAN
 LABEL maintainer=kuhnsa@nih.gov
 
 ############### INIT ################
