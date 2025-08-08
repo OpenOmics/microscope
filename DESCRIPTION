@@ -8,7 +8,7 @@ Description: A Shiny application for interactive data exploration and visualizat
 Depends: R (>= 4.0)
 Imports:
     shiny,
-    shinydashboard,
+    bs4Dash,
     ggplot2,
     ggpubr,
     dplyr,
