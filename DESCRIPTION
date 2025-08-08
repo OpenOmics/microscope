@@ -1,7 +1,7 @@
 Package: microscope
 Type: Package
 Title: An all-in-one microbiome diversity and taxonomy viewer
-Version: 0.1.0
+Version: 0.2.0
 Author: Yue (Gary) Zhang <yue.zhang AT nih.gov>
 Maintainer: Yue (Gary) Zhang <yue.zhang AT nih.gov>, Skyler Kuhn <skyler.kuhn AT nih.gov>
 Description: A Shiny application for interactive data exploration and visualization of microbiome diversity and taxonomy data.
