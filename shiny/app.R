@@ -330,7 +330,9 @@ server <- function(input, output, session) {
       req(beta_data(), input$beta_matrix, input$beta_group)
       dm <- beta_data()$beta[[input$beta_matrix]]
       metadata <- beta_data()$metadata
-      p <- plot_beta_pcoa(dm, metadata, input$beta_group, input$beta_matrix)
+      p <- plot_beta_pcoa(dm = dm, metatable = metadata,
+                          grp = input$beta_group, dm_name = input$beta_matrix,
+                          permtest = TRUE, grp_continuous = FALSE)
       ggsave(file, plot = p, width = 8, height = 6, dpi = 300)
     }
   )
@@ -346,7 +348,7 @@ server <- function(input, output, session) {
       split_2 <- if (input$split_by_2 == "None") NULL else input$split_by_2
       p <- plot_tax_stacked_bar(exps = tax_result[[3]], pheno = pheno_data(),
                                 split_by_1 = split_1, split_by_2 = split_2,
-                                show_names = input$show_names)
+                                show_names = input$show_names) + xlab("Sample")
       ggsave(file, plot = p, width = 10, height = 8, dpi = 300)
     }
   )

@@ -472,8 +472,7 @@ plot_tax_stacked_bar <- function(exps, pheno, split_by_1 = NULL, split_by_2 = NU
       axis.title = element_text(size = 18, face = "bold"),
       strip.text.x = element_text(size = 15, color = "black", face = "bold"),
       strip.background = element_rect(color = "black", fill = "grey95", size = 1.5, linetype = "solid")
-    ) +
-    xlab("Sample") +
+    ) + xlab(" ") +
     ylab("Relative Abundance (%)") +
     guides(fill = guide_legend(ncol = legend_cols))
   
